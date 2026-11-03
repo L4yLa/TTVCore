@@ -1,0 +1,15 @@
+<Project ToolsVersion="Current">
+
+  <!--
+    このファイルを TTVCore.csproj.user にコピーし、ゲームの版ごとに Beat Saber のフォルダーを指定する。
+    必ずその版のインスタンスを指すこと（ビルド前に BeatSaberVersion.txt と照合する）。
+  -->
+  <PropertyGroup Condition="'$(BSTarget)' == '1.40.8'">
+    <BeatSaberDir>C:\Path\To\Beat Saber 1.40.8</BeatSaberDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BSTarget)' == '1.44.1'">
+    <BeatSaberDir>C:\Path\To\Beat Saber 1.44.1</BeatSaberDir>
+  </PropertyGroup>
+
+</Project>

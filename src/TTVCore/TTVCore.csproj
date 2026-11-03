@@ -1,0 +1,110 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputPath>bin\$(BSTarget)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(BSTarget)\$(Configuration)\</IntermediateOutputPath>
+    <ManifestPath>Manifests\$(BSTarget)\manifest.json</ManifestPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BSIPA は末尾が .manifest.json の埋め込みリソースを探すため、名前は版によらず固定する。 -->
+    <None Remove="Manifests\**" />
+    <EmbeddedResource Include="Manifests\$(BSTarget)\manifest.json" LogicalName="TTVCore.manifest.json" />
+    <!-- tools/build_emoji.py で作る -->
+    <EmbeddedResource Include="Resources\emoji-table.txt" LogicalName="TTVCore.Resources.emoji-table.txt" />
+    <EmbeddedResource Include="Resources\twemoji.bin" LogicalName="TTVCore.Resources.twemoji.bin" />
+    <EmbeddedResource Include="UI\SettingsView.bsml" LogicalName="TTVCore.UI.SettingsView.bsml" />
+    <None Remove="Resources\**" />
+    <None Remove="UI\*.bsml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BeatSaberModdingTools.Tasks" Version="2.0.0-beta7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEngine">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="HMUI">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- ViewController / FlowCoordinator（名前空間は HMUI） -->
+    <Reference Include="BeatSaber.ViewSystem">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- MainFlowCoordinator -->
+    <Reference Include="Main">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Zenject">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BSML">
+      <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="IPA.Loader">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Net.Http" />
+    <!-- 画像のデコード（BSML と同じく GDI+ を使う） -->
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <Target Name="TTV_ValidateTarget" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(BSTarget)' != '1.40.8' AND '$(BSTarget)' != '1.44.1'"
+           Text="Unsupported BSTarget '$(BSTarget)'. Use Platform BS1.40.8 or BS1.44.1." />
+    <Error Condition="'$(BeatSaberDir)' == ''"
+           Text="BeatSaberDir is not set. Copy TTVCore.csproj.user.example to TTVCore.csproj.user and set the Beat Saber folder for each game version." />
+    <Error Condition="!Exists('$(ManifestPath)')"
+           Text="Manifest not found: $(ManifestPath)" />
+
+    <!-- BeatSaberVersion.txt の例: 1.44.1_20239 -->
+    <PropertyGroup>
+      <_TtvGameVersionFile>$(BeatSaberDir)\BeatSaberVersion.txt</_TtvGameVersionFile>
+      <_TtvGameVersionRaw Condition="Exists('$(_TtvGameVersionFile)')">$([System.IO.File]::ReadAllText('$(_TtvGameVersionFile)').Trim())</_TtvGameVersionRaw>
+      <_TtvGameVersion Condition="'$(_TtvGameVersionRaw)' != ''">$([System.Text.RegularExpressions.Regex]::Replace('$(_TtvGameVersionRaw)', '_.*$', ''))</_TtvGameVersion>
+    </PropertyGroup>
+    <Error Condition="'$(_TtvGameVersion)' != '' AND '$(_TtvGameVersion)' != '$(BSTarget)'"
+           Text="BeatSaberDir '$(BeatSaberDir)' is game version $(_TtvGameVersion), but BSTarget is $(BSTarget). Point BeatSaberDir to a $(BSTarget) instance (see TTVCore.csproj.user)." />
+    <Warning Condition="'$(_TtvGameVersion)' == ''"
+             Text="BeatSaberVersion.txt was not found in BeatSaberDir '$(BeatSaberDir)'; the game version could not be verified." />
+
+    <Message Importance="high" Text="TTVCore: BSTarget=$(BSTarget), BeatSaberDir=$(BeatSaberDir)" />
+  </Target>
+
+</Project>

@@ -1,0 +1,22 @@
+{
+  "subscription": { "type": "channel.chat.message", "version": "1" },
+  "event": {
+    "broadcaster_user_id": "1", "broadcaster_user_login": "broadcaster", "broadcaster_user_name": "Broadcaster",
+    "chatter_user_id": "2", "chatter_user_login": "viewer", "chatter_user_name": "Viewer",
+    "message_id": "test-message-1",
+    "message": {
+      "text": "Kappa こんにちは 👍🏽 catJAM",
+      "fragments": [
+        { "type": "emote", "text": "Kappa", "cheermote": null, "mention": null,
+          "emote": { "id": "25", "emote_set_id": "0", "owner_id": "0", "format": ["static"] } },
+        { "type": "text", "text": " こんにちは 👍🏽 catJAM", "cheermote": null, "emote": null, "mention": null }
+      ]
+    },
+    "color": "#00FF7F",
+    "badges": [ { "set_id": "subscriber", "id": "12", "info": "16" } ],
+    "message_type": "text",
+    "cheer": null, "reply": null, "channel_points_custom_reward_id": null,
+    "source_broadcaster_user_id": null, "source_broadcaster_user_login": null, "source_broadcaster_user_name": null,
+    "source_message_id": null, "source_badges": null
+  }
+}

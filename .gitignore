@@ -1,0 +1,7 @@
+bin/
+obj/
+release/
+.vs/
+*.csproj.user
+*.user
+build.log

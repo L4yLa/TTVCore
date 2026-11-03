@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/beat-saber-modding-group/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "TTVCore",
+  "name": "TTVCore",
+  "author": "L4yLa",
+  "version": "0.1.0",
+  "description": "Connects to Twitch through EventSub and provides chat, notifications and emote images to other mods.",
+  "gameVersion": "1.44.1",
+  "dependsOn": {
+    "BSIPA": "^4.3.7",
+    "BeatSaberMarkupLanguage": "^1.14.1"
+  }
+}

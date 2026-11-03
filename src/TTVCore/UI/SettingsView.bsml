@@ -1,0 +1,12 @@
+<vertical child-control-height='false' child-expand-height='false' spacing='2' pad='4' preferred-width='110' vertical-fit='PreferredSize'>
+  <text text='~auth-status' font-size='5' align='Center' size-delta-y='8' />
+  <horizontal preferred-width='90' horizontal-fit='PreferredSize'>
+    <button text='~auth-button-text' on-click='authenticate' interactable='~auth-button-interactable' preferred-width='50' />
+  </horizontal>
+  <dropdown-list-setting text='Language / 言語' value='language' choices='languages' apply-on-change='true' />
+  <toggle-setting text='{{Allow chat sending from other mods|他の MOD からのチャット送信を許可}}' value='third-party-send' apply-on-change='true'
+                  hover-hint='{{Lets mods other than TTVStreamersKit send chat messages with your account|TTVStreamersKit 以外の MOD があなたのアカウントでチャットに送信できるようにします}}' />
+  <slider-setting text='{{Cache VRAM limit|キャッシュの VRAM 上限}}' value='pack-vram' min='0' max='256' increment='16' integer-only='true' apply-on-change='true'
+                  hover-hint='{{In MB. Frequently used emotes are preloaded into shared textures in the menu. 0 turns it off|単位は MB です よく使われるエモートをメニューで共有のテクスチャに先読みします 0 で使いません}}' />
+  <text id='preview-text' text='' font-size='4' align='TopLeft' word-wrapping='true' size-delta-y='30' active='~show-preview' />
+</vertical>
