@@ -4,6 +4,7 @@ Beat Saber 向けの、Twitch と接続するための MOD です。
 Twitch の認証、EventSub によるチャットと通知の受信、チャットの送信、エモート・バッジ・絵文字の画像の取得を行います。
 
 本 MOD で取得しているエモートなどについて、別の MOD から取得できる API を用意しています。
+使い方は [開発者向けガイド](docs/developer-guide.ja.md)（[English](docs/developer-guide.en.md)）を参照してください。
 
 ## 依存 MOD
 
