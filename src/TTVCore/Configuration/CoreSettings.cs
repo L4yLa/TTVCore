@@ -32,13 +32,25 @@ namespace TTVCore.Configuration
         [JsonProperty("pack_page_size")]
         public int PackPageSize { get; set; } = 2048;
 
-        /// <summary>表示の統計を残すセッションの数（N）。</summary>
+        /// <summary>表示の統計を残すセッションの数（N）。暫定値。</summary>
         [JsonProperty("stats_session_count")]
-        public int StatsSessionCount { get; set; } = 10;
+        public int StatsSessionCount { get; set; } = 20;
 
-        /// <summary>この数（M）以上のセッションに出たエモートをパックの候補にする。</summary>
-        [JsonProperty("stats_min_sessions")]
-        public int StatsMinSessions { get; set; } = 3;
+        /// <summary>記録のあるセッションのうち、この割合以上（最低2回）に出たエモートをパックの候補にする。暫定値。</summary>
+        [JsonProperty("stats_min_session_ratio")]
+        public float StatsMinSessionRatio { get; set; } = 0.3f;
+
+        /// <summary>候補の順位付けで、1回前のセッションごとに掛ける重み（0～1）。暫定値。</summary>
+        [JsonProperty("stats_decay")]
+        public float StatsDecay { get; set; } = 0.85f;
+
+        /// <summary>受け取ったメッセージがこの数より少ないゲームの起動はセッションとして記録しない。暫定値。</summary>
+        [JsonProperty("stats_min_messages")]
+        public int StatsMinMessages { get; set; } = 30;
+
+        /// <summary>メニュー画面で統計を保存する間隔（分）。ゲームの終了時にも保存する。暫定値。</summary>
+        [JsonProperty("stats_save_interval_minutes")]
+        public int StatsSaveIntervalMinutes { get; set; } = 10;
 
         private static string FilePath => Path.Combine(UnityGame.UserDataPath, "TTVCore", FileName);
 

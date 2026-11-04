@@ -125,7 +125,11 @@ namespace TTVCore.Images
                 UploadOne();
                 return;
             }
-            if (s_dirty && !s_building && SceneManager.GetActiveScene().name == MenuScene) {
+            if (SceneManager.GetActiveScene().name != MenuScene) {
+                return;
+            }
+            DisplayStats.SaveIfDue();
+            if (s_dirty && !s_building) {
                 TryStartBuild();
             }
         }
@@ -201,7 +205,6 @@ namespace TTVCore.Images
         private static List<ImageKey> CollectKeys(string broadcasterId)
         {
             var channel = CatalogStore.GetChannel(broadcasterId);
-            var global = CatalogStore.Global;
             var keys = new List<ImageKey>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
             void Add(ImageKey k)
@@ -220,28 +223,10 @@ namespace TTVCore.Images
             foreach (var b in channel.Badges.Values) {
                 Add(b.Image);
             }
-            foreach (var (provider, name) in DisplayStats.Candidates()) {
-                EmoteEntry e = null;
-                switch (provider) {
-                    case EmoteProvider.Twitch:
-                        // Twitch には名前からエモートを引く API がないため、配信者とグローバルの一覧にあるものだけ
-                        if (!channel.TwitchEmotes.TryGetValue(name, out e)) {
-                            global.TwitchEmotes.TryGetValue(name, out e);
-                        }
-                        break;
-                    case EmoteProvider.Bttv:
-                        if (!channel.BttvEmotes.TryGetValue(name, out e)) {
-                            global.BttvEmotes.TryGetValue(name, out e);
-                        }
-                        break;
-                    case EmoteProvider.Ffz:
-                        if (!channel.FfzEmotes.TryGetValue(name, out e)) {
-                            global.FfzEmotes.TryGetValue(name, out e);
-                        }
-                        break;
-                }
-                if (e != null) {
-                    Add(e.Image);
+            foreach (var key in DisplayStats.Candidates()) {
+                // Twitch のエモートは ID から取得先が決まる。BTTV / FFZ は読み込み済みの一覧にあるものだけ取得先が分かる
+                if (ImageSources.Resolve(key) != null) {
+                    Add(key);
                 }
             }
             var participants = TTVCoreApi.Channel.SharedChat?.Participants;
