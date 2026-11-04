@@ -145,6 +145,7 @@ Notes:
 - While TTVCore waits for the other side (up to a few seconds), the item is delayed. As a result, the order in which items are raised may differ from the order of `Timestamp`.
 - `Notification` or `Notice`, or both sides of a pair, may be missing. Make sure the item can be displayed when either one is null.
 - An ad break arrives twice: at the start and at the estimated end. The estimated-end item has `AdBreakNotification.IsEstimatedEnd` set to true.
+- Chat notices of type `ChatNoticeType.Unknown` do not appear in the timeline (they still arrive through `Chat.NoticeReceived`).
 
 ```csharp
 private void OnTimelineItem(TimelineItem item)
@@ -176,11 +177,11 @@ private void OnTimelineItem(TimelineItem item)
 | `HypeTrainBegan` / `HypeTrainProgressed` | `HypeTrainNotification` |
 | `HypeTrainEnded` | `HypeTrainEndNotification` |
 | `AdBreakBegan` / `AdBreakEnded` | `AdBreakNotification` |
-| `NotificationReceived` | `RawNotification` (all notifications, raised before the typed events) |
+| `NotificationReceived` | `RawNotification` (all notifications except chat, raised before the typed events) |
 
 - Twitch does not send a notification when an ad break ends. `AdBreakEnded` is raised at a time calculated from the start time and duration. It may differ from the ads that viewers actually see.
-- Notifications that TTVCore does not convert to a type are still available through `RawJson` in `NotificationReceived`.
-- If a notification cannot be read or is of an unknown type, TTVCore skips it without throwing.
+- Notifications that TTVCore does not convert to a type are still available through `RawJson` in `NotificationReceived`. Chat (`channel.chat.*`) and shared chat (`channel.shared_chat.*`) notifications are not included. They arrive through the `Chat` and `Channel` events.
+- If a notification cannot be read, TTVCore skips the typed event without throwing (`NotificationReceived` still receives it).
 
 ## 7. Sending chat
 
@@ -201,7 +202,7 @@ private async void Reply(string text, string parentMessageId)
 - Messages are sent from the broadcaster's account. During a shared chat, they appear in all participating channels.
 - **Users can block sending from other mods in the TTVCore settings.** When blocked, the result is `Disabled`. You can check this beforehand with `Chat.ThirdPartySendEnabled`.
 - TTVCore puts all sends in one queue and sends them in order, at most 20 messages per 30 seconds. When more than 20 messages are waiting, the result is `RateLimited`.
-- Text longer than 500 characters is not sent, and the result is `TooLong`.
+- Text longer than 500 characters is not sent, and the result is `TooLong`. Empty text results in `Failed`.
 - `Dropped` means Twitch accepted the message but did not display it (for example, because of AutoMod). The reason is in `DropReasonCode` / `DropReasonMessage`.
 
 ## 8. Images
@@ -259,15 +260,18 @@ var binding = TTVCoreApi.Images.Bind(textMeshPro, content);
 | Member | Description |
 |---|---|
 | `GetEmotes(broadcasterId)` | Channel and global emotes (Twitch / BTTV / FFZ) |
-| `TryFindEmote(broadcasterId, name, out emote)` | Finds an emote by name, checking the channel first and then global emotes |
+| `TryFindEmote(broadcasterId, name, out emote)` | Finds an emote by name. Twitch emotes are checked first (channel, then global), followed by BTTV / FFZ (channel, then global) |
 | `GetBadge(broadcasterId, badge)` | The badge's title and image, or null if not found |
 | `EmotesUpdated` | Raised when a list is updated. The argument is the channel ID (null for the global list) |
 
-The lists are loaded after connecting and may be empty before that, so use them after receiving `EmotesUpdated`. When a viewer uses an emote from another channel, it is not in these lists and appears only as a message fragment (`EmoteFragment`).
+The lists are loaded after EventSub connects. During a shared chat, the lists of participating channels are loaded too. They are empty until loaded, so use them after receiving `EmotesUpdated`. When a viewer uses an emote from another channel, it is not in these lists and appears only as a message fragment (`EmoteFragment`).
 
 ## 11. Testing
 
-A Debug build of TTVCore processes JSON files placed in `UserData\TTVCore\inject\` as received EventSub notifications (including chat messages). Example JSON is in [test-payloads/](../test-payloads/). You can check your display without triggering real events on a stream.
+A Debug build of TTVCore processes `*.json` files placed in `UserData\TTVCore\inject\` as received EventSub notifications (including chat messages). You can check your display without triggering real events on a stream.
+
+- The JSON is either an EventSub WebSocket message (`{"metadata": ..., "payload": ...}`) or `{"subscription": ..., "event": ...}`, the same shape as the examples in the official Twitch reference. Examples are in [test-payloads/](../test-payloads/).
+- Processed files are moved to `inject\done\`.
 
 To build in the Debug configuration, run the following in TTVCore's `src\TTVCore`:
 

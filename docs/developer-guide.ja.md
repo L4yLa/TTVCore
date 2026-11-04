@@ -145,6 +145,7 @@ if ((message.Sender.Roles & (ChatRoles.Broadcaster | ChatRoles.Moderator)) != 0)
 - 片方を待つ間（最大数秒）、その通知は遅れて発生します。そのため、発生順と `Timestamp` の順が一致しないことがあります。
 - `Notification` と `Notice` のどちらか、または両方がそろわないことがあります。どちらが null でも表示できるようにしてください。
 - 広告（`AdBreak`）は、開始時と終了の目安の時刻の2回届きます。終了の目安のものは `AdBreakNotification.IsEstimatedEnd` が true です。
+- 種類が `ChatNoticeType.Unknown` のチャット上の通知は、タイムラインには届きません（`Chat.NoticeReceived` には届きます）。
 
 ```csharp
 private void OnTimelineItem(TimelineItem item)
@@ -176,11 +177,11 @@ private void OnTimelineItem(TimelineItem item)
 | `HypeTrainBegan` / `HypeTrainProgressed` | `HypeTrainNotification` |
 | `HypeTrainEnded` | `HypeTrainEndNotification` |
 | `AdBreakBegan` / `AdBreakEnded` | `AdBreakNotification` |
-| `NotificationReceived` | `RawNotification`（すべての通知。種類別のイベントより先に発生） |
+| `NotificationReceived` | `RawNotification`（チャット以外のすべての通知。種類別のイベントより先に発生） |
 
 - Twitch に広告の終了の通知はありません。`AdBreakEnded` は、開始時刻と長さから計算した時刻に発生します。実際に視聴者に出る広告とはずれることがあります。
-- TTVCore が型に変換しない種類の通知も、`NotificationReceived` の `RawJson` で受け取れます。
-- 通知の内容を読めなかった場合や未知の種類の場合、TTVCore は例外を出さずに飛ばします。
+- TTVCore が型に変換しない種類の通知も、`NotificationReceived` の `RawJson` で受け取れます。チャット（`channel.chat.*`）と共有チャット（`channel.shared_chat.*`）の通知は含みません。これらは `Chat` と `Channel` のイベントで届きます。
+- 通知の内容を読めなかった場合、TTVCore は例外を出さずに種類別のイベントを飛ばします（`NotificationReceived` には届きます）。
 
 ## 7. チャットの送信
 
@@ -201,7 +202,7 @@ private async void Reply(string text, string parentMessageId)
 - 配信者のアカウントで送信します。共有チャット中は、参加しているすべてのチャンネルに表示されます。
 - **利用者は、他の MOD からの送信を TTVCore の設定で止められます。** 止めている場合、結果は `Disabled` です。事前に `Chat.ThirdPartySendEnabled` で確認できます。
 - 送信は TTVCore が1つの列に並べ、30秒あたり20件までに抑えて順に送ります。送信待ちが20件を超えると `RateLimited` になります。
-- 500 文字を超える文は送らず、`TooLong` になります。
+- 500 文字を超える文は送らず、`TooLong` になります。空の文は `Failed` になります。
 - `Dropped` は、Twitch が受け付けたものの表示しなかった場合です（AutoMod など）。理由は `DropReasonCode` / `DropReasonMessage` に入ります。
 
 ## 8. 画像
@@ -259,15 +260,18 @@ var binding = TTVCoreApi.Images.Bind(textMeshPro, content);
 | メンバー | 内容 |
 |---|---|
 | `GetEmotes(broadcasterId)` | チャンネルとグローバルのエモート（Twitch / BTTV / FFZ） |
-| `TryFindEmote(broadcasterId, name, out emote)` | 名前から探す。チャンネルのものを先に、次にグローバルを見る |
+| `TryFindEmote(broadcasterId, name, out emote)` | 名前から探す。Twitch エモート（チャンネル、グローバルの順）を先に、次に BTTV / FFZ（チャンネル、グローバルの順）を見る |
 | `GetBadge(broadcasterId, badge)` | バッジの名前と画像。見つからなければ null |
 | `EmotesUpdated` | 一覧が更新された。引数はチャンネルの ID（グローバルなら null） |
 
-一覧は接続後に読み込まれます。読み込み前は空のことがあるため、`EmotesUpdated` を受けてから使ってください。視聴者が他のチャンネルのエモートを使った場合、そのエモートは一覧にはなく、メッセージの部品（`EmoteFragment`）でだけ分かります。
+一覧は EventSub の接続後に読み込まれます。共有チャット中は、参加チャンネルの一覧も読み込まれます。読み込み前は空のため、`EmotesUpdated` を受けてから使ってください。視聴者が他のチャンネルのエモートを使った場合、そのエモートは一覧にはなく、メッセージの部品（`EmoteFragment`）でだけ分かります。
 
 ## 11. 動作の確認
 
-Debug 構成でビルドした TTVCore は、`UserData\TTVCore\inject\` に置いた JSON を、受信した EventSub の通知（チャットのメッセージを含む）として処理します。JSON の例は [test-payloads/](../test-payloads/) にあります。実際の配信で通知を起こさなくても、表示を確かめられます。
+Debug 構成でビルドした TTVCore は、`UserData\TTVCore\inject\` に置いた `*.json` を、受信した EventSub の通知（チャットのメッセージを含む）として処理します。実際の配信で通知を起こさなくても、表示を確かめられます。
+
+- JSON の形式は、EventSub の WebSocket のメッセージ（`{"metadata": ..., "payload": ...}`）か、Twitch の公式リファレンスの例と同じ `{"subscription": ..., "event": ...}` です。例は [test-payloads/](../test-payloads/) にあります。
+- 処理したファイルは `inject\done\` に移されます。
 
 Debug 構成でビルドするには、TTVCore の `src\TTVCore` で次を実行します。
 
