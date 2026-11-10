@@ -37,11 +37,14 @@ Add TTVCore to `dependsOn`.
 
 ```json
 "dependsOn": {
-  "TTVCore": "^0.1.0"
+  "TTVCore": ">=0.1.0"
 }
 ```
 
-`^0.1.0` means 0.1.0 or later and earlier than 0.2.0.
+`>=0.1.0` means 0.1.0 or later. Within V1, members are only added, so the existing members keep working when TTVCore is updated.
+
+- `^0.1.0` means 0.1.0 or later and earlier than 0.2.0, so your mod would not load with TTVCore 0.2.0 or later.
+- To use a member added later, raise the lower bound to the version that added it, or check `TTVCoreApi.MinorVersion` (section 2).
 
 ## 2. Basic rules
 
