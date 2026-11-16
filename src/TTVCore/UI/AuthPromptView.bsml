@@ -1,0 +1,15 @@
+<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+  <!-- text は LayoutElement を持たず pref-width が効かないため、幅を決めた horizontal で包む -->
+  <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='4' child-control-height='true' child-expand-height='false'>
+    <horizontal pref-width='120' pref-height='10'>
+      <text text='{{Twitch authorization required.|Twitch の認証が必要です}}' font-size='7' align='Center' />
+    </horizontal>
+    <horizontal pref-width='120' pref-height='26'>
+      <text text='~message-text' font-size='4.5' align='Center' word-wrapping='true' />
+    </horizontal>
+    <horizontal spacing='6' horizontal-fit='PreferredSize' pref-height='9'>
+      <button text='{{Open again|再度開く}}' on-click='reopen' pref-width='36' pref-height='9' />
+      <button text='{{Ignore|無視}}' on-click='ignore' pref-width='36' pref-height='9' />
+    </horizontal>
+  </vertical>
+</bg>

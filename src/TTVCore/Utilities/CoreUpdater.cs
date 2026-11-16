@@ -19,6 +19,7 @@ namespace TTVCore.Utilities
             ImageManager.Update();
             TmpBindings.Update();
             UI.SettingsMenu.Update();
+            UI.AuthPrompt.Update();
         }
     }
 }

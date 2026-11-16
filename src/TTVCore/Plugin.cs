@@ -57,6 +57,7 @@ namespace TTVCore
             ImageManager.Initialize(_cts.Token);
             CoreUpdater.Create();
             UI.SettingsMenu.Initialize();
+            UI.AuthPrompt.Initialize();
 
             _tokenManager = new TokenManager();
             _tokenManager.Start();

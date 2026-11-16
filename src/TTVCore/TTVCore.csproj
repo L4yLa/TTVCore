@@ -14,6 +14,7 @@
     <EmbeddedResource Include="Resources\emoji-table.txt" LogicalName="TTVCore.Resources.emoji-table.txt" />
     <EmbeddedResource Include="Resources\twemoji.bin" LogicalName="TTVCore.Resources.twemoji.bin" />
     <EmbeddedResource Include="UI\SettingsView.bsml" LogicalName="TTVCore.UI.SettingsView.bsml" />
+    <EmbeddedResource Include="UI\AuthPromptView.bsml" LogicalName="TTVCore.UI.AuthPromptView.bsml" />
     <None Remove="Resources\**" />
     <None Remove="UI\*.bsml" />
   </ItemGroup>
@@ -62,6 +63,11 @@
     <!-- MainFlowCoordinator -->
     <Reference Include="Main">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- GameScenesManager（画面の切り替え中かどうか） -->
+    <Reference Include="BGLib.AppFlow">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.AppFlow.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Zenject">

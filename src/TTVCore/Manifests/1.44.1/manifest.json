@@ -3,7 +3,7 @@
   "id": "TTVCore",
   "name": "TTVCore",
   "author": "L4yLa",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Connects to Twitch through EventSub and provides chat, notifications and emote images to other mods.",
   "gameVersion": "1.44.1",
   "dependsOn": {

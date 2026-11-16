@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TTVCore.Api.V1;
 using TTVCore.Helix;
 using TTVCore.Twitch;
+using TTVCore.UI;
 using TTVCore.Utilities;
 
 namespace TTVCore.Auth
@@ -77,7 +78,10 @@ namespace TTVCore.Auth
         }
 
         /// <summary>認証を始める（認証ページを開く）。認証中なら何もしない。</summary>
-        public void StartAuthentication()
+        public void StartAuthentication() => this.StartAuthentication(AuthPromptReason.Manual);
+
+        /// <summary>認証を始める。<paramref name="reason"/> は案内のダイアログを出すかの判定に使う。</summary>
+        public void StartAuthentication(AuthPromptReason reason)
         {
             var ct = _cts?.Token ?? CancellationToken.None;
             if (ct.IsCancellationRequested) {
@@ -87,7 +91,7 @@ namespace TTVCore.Auth
                 Plugin.Log.Info("Auth: authorization is already in progress.");
                 return;
             }
-            _ = Task.Run(() => this.DeviceFlowAsync(ct));
+            _ = Task.Run(() => this.DeviceFlowAsync(reason, ct));
         }
 
         /// <summary>使えるアクセストークンを返す。期限が近ければ先に更新する。未認証なら null。</summary>
@@ -170,14 +174,14 @@ namespace TTVCore.Auth
                 if (stored == null) {
                     Plugin.Log.Info("Auth: no stored token. Starting authorization.");
                     this.SetState(AuthState.Unauthenticated);
-                    this.StartAuthentication();
+                    this.StartAuthentication(AuthPromptReason.Startup);
                     return;
                 }
                 if (!this.IsUsable(stored, out var reason)) {
                     Plugin.Log.Info($"Auth: stored token cannot be used ({reason}). Starting authorization.");
                     TokenStore.Delete();
                     this.SetState(AuthState.Unauthenticated);
-                    this.StartAuthentication();
+                    this.StartAuthentication(AuthPromptReason.Startup);
                     return;
                 }
 
@@ -226,7 +230,7 @@ namespace TTVCore.Auth
             }
         }
 
-        private async Task DeviceFlowAsync(CancellationToken ct)
+        private async Task DeviceFlowAsync(AuthPromptReason reason, CancellationToken ct)
         {
             try {
                 this.SetState(AuthState.WaitingForUser);
@@ -245,6 +249,7 @@ namespace TTVCore.Auth
                 }
 
                 BrowserOpener.Open(device.VerificationUri);
+                AuthPrompt.NotifyDeviceCode(device.UserCode, device.VerificationUri, device.ExpiresIn, reason);
                 Plugin.Log.Info($"Auth: waiting for the user to authorize (expires in {device.ExpiresIn} s).");
 
                 var interval = TimeSpan.FromSeconds(Math.Max(1, device.Interval));
@@ -286,6 +291,7 @@ namespace TTVCore.Auth
             }
             finally {
                 BrowserOpener.CancelPending();
+                AuthPrompt.NotifyDeviceFlowEnded();
                 Interlocked.Exchange(ref _deviceFlowRunning, 0);
             }
         }
@@ -438,7 +444,7 @@ namespace TTVCore.Auth
             _nextValidateUtc = DateTime.MaxValue;
             TokenStore.Delete();
             this.SetState(AuthState.Unauthenticated);
-            this.StartAuthentication();
+            this.StartAuthentication(AuthPromptReason.Lost);
         }
 
         private void TrySave(TokenData token)
