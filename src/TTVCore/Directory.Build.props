@@ -11,7 +11,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>TTVCore</AssemblyName>
     <RootNamespace>TTVCore</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>L4yLa</Authors>
     <Product>TTVCore</Product>
     <Configurations>Debug;Release</Configurations>
