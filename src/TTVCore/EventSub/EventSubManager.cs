@@ -11,9 +11,7 @@ using System.Threading.Tasks;
 using TTVCore.Api.V1;
 using TTVCore.Auth;
 using TTVCore.Chat;
-#if DEBUG
 using TTVCore.Diagnostics;
-#endif
 using TTVCore.Twitch;
 using TTVCore.Utilities;
 
@@ -54,8 +52,14 @@ namespace TTVCore.EventSub
 
         public EventSubState State => _state;
 
-        /// <summary>現在の接続で購読が有効になっている種類か。</summary>
-        public bool IsSubscribed(string subscriptionType) => _state == EventSubState.Connected && _active.Contains(subscriptionType);
+        /// <summary>
+        /// 現在の接続で購読が有効になっている種類か。デバッグ機能が有効な間は、テストで両方の側（Chat と Notifications）を流すため、
+        /// 接続や購読の状態によらず、すべて購読しているものとして扱う。
+        /// </summary>
+        public bool IsSubscribed(string subscriptionType) =>
+            DebugMode.Active
+                ? SubscriptionDefinitions.All.Any(d => d.Type == subscriptionType)
+                : _state == EventSubState.Connected && _active.Contains(subscriptionType);
 
         private sealed class Connection : IDisposable
         {
@@ -269,7 +273,8 @@ namespace TTVCore.EventSub
                     return pending;
 
                 case "notification":
-                    if (_dedupe.TryAdd(JsonUtil.Str(JsonUtil.At(jo, "metadata", "message_id")))) {
+                    // デバッグ機能が有効な間は、本物の通知とチャットを捨てる（Twitch は再送しないため、その間のものは失われる）
+                    if (_dedupe.TryAdd(JsonUtil.Str(JsonUtil.At(jo, "metadata", "message_id"))) && !DebugMode.Active) {
                         _dispatcher.Dispatch(jo);
                     }
                     return pending;
@@ -478,6 +483,14 @@ namespace TTVCore.EventSub
                         return Encoding.UTF8.GetString(ms.ToArray());
                     }
                 }
+            }
+        }
+
+        /// <summary>デバッグ機能のテストの通知を、受信したものとして処理する（DebugEvents から呼ぶ）。</summary>
+        internal void InjectTest(JObject message)
+        {
+            if (DebugMode.Active) {
+                _dispatcher?.Dispatch(message);
             }
         }
 

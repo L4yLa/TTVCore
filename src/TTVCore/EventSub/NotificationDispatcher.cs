@@ -8,6 +8,7 @@ using TTVCore.Api.V1;
 using TTVCore.Catalog;
 using TTVCore.Images;
 using TTVCore.Chat;
+using TTVCore.Diagnostics;
 using TTVCore.Twitch;
 using TTVCore.Utilities;
 
@@ -288,10 +289,15 @@ namespace TTVCore.EventSub
                 delay = MaxAdEndDelay;
             }
             var ct = _ct;
+            // デバッグ機能のテストの広告は、解除した後には終了を送らない
+            var fromDebug = DebugMode.Active;
             _ = Task.Run(async () => {
                 try {
                     if (delay > TimeSpan.Zero) {
                         await Task.Delay(delay, ct).ConfigureAwait(false);
+                    }
+                    if (fromDebug && !DebugMode.Active) {
+                        return;
                     }
                     // 終了は開始とは別の出来事として、イベントとタイムラインの両方に送る
                     var end = new AdBreakNotification {

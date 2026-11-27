@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using TMPro;
 using TTVCore.Api.V1;
 using TTVCore.Configuration;
+using TTVCore.Diagnostics;
 using TTVCore.Utilities;
+using UnityEngine.UI;
 
 namespace TTVCore.UI
 {
@@ -114,10 +116,73 @@ namespace TTVCore.UI
             TTVCoreApi.Connection.StartAuthentication();
         }
 
+        // ================= デバッグ機能 =================
+
+        // 有効にするには長押しが要る（配信中にうっかり有効にしないため）
+        private const float DebugHoldSeconds = 3f;
+
+        [UIComponent("debug-button")]
+        private Button _debugButton = null;
+
+        private LongPressHandler _debugHold;
+
+        private static string DebugEnableText => Localization.T("Enable debug (hold)", "デバッグ有効（長押し）");
+
+        [UIValue("debug-button-text")]
+        private string DebugButtonText => DebugMode.Active ? Localization.T("Disable debug", "デバッグ無効") : DebugEnableText;
+
+        [UIValue("debug-active")]
+        private bool DebugActive => DebugMode.Active;
+
+        [UIValue("debug-status")]
+        private string DebugStatus => DebugMode.Active
+            ? "<color=#FFA500>" + Localization.T("Debug: real notifications and chat are ignored, and nothing is sent",
+                                                 "デバッグ中  本物の通知とチャットを無視し 送信もしません") + "</color>"
+            : "";
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            if (_debugButton == null) {
+                return;
+            }
+            // ボタン自身では長押しを作れないため、上に重ねた当たり判定で扱う（LongPressHandler の説明）
+            _debugHold = LongPressHandler.AttachTo(_debugButton);
+            _debugHold.Duration = DebugHoldSeconds;
+            _debugHold.CanStart = () => !DebugMode.Active;
+            // BSML のボタンの文字は Content/Text にある
+            var label = _debugButton.transform.Find("Content/Text")?.GetComponent<TextMeshProUGUI>();
+            _debugHold.Progress = p => {
+                if (label != null && !DebugMode.Active) {
+                    label.text = p.HasValue ? $"{DebugEnableText}  {(int)(p.Value * 100)}%" : DebugEnableText;
+                }
+            };
+            _debugHold.Completed = DebugMode.Enable;
+            // 有効なときは、押して離すだけで解除する
+            _debugHold.Clicked = DebugMode.Disable;
+        }
+
+        [UIAction("open-tests")]
+        private void OpenTests()
+        {
+            if (DebugMode.Active) {
+                SettingsMenu.ShowTests();
+            }
+        }
+
+        private void OnDebugChanged()
+        {
+            this.NotifyPropertyChanged(nameof(this.DebugButtonText));
+            this.NotifyPropertyChanged(nameof(this.DebugActive));
+            this.NotifyPropertyChanged(nameof(this.DebugStatus));
+        }
+
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             TTVCoreApi.Connection.AuthStateChanged += this.OnStateChanged;
+            DebugMode.Changed += this.OnDebugChanged;
+            this.OnDebugChanged();
             if (PreviewEnabled) {
                 TTVCoreApi.Chat.TimelineItemReceived += this.OnTimelineItem;
             }
@@ -127,6 +192,7 @@ namespace TTVCore.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             TTVCoreApi.Connection.AuthStateChanged -= this.OnStateChanged;
+            DebugMode.Changed -= this.OnDebugChanged;
             TTVCoreApi.Chat.TimelineItemReceived -= this.OnTimelineItem;
             _previewBinding?.Dispose();
             _previewBinding = null;

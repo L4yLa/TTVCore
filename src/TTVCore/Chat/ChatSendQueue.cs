@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TTVCore.Api.V1;
 using TTVCore.Auth;
+using TTVCore.Diagnostics;
 using TTVCore.Helix;
 using TTVCore.Twitch;
 using TTVCore.Utilities;
@@ -32,6 +33,8 @@ namespace TTVCore.Chat
             public string Text;
             public string ReplyParentMessageId;
             public TaskCompletionSource<SendResult> Completion;
+            // 列に入れたときにデバッグ機能が有効だったか。解除の後に本物として送らないため
+            public bool Debug;
         }
 
         private readonly object _gate = new object();
@@ -58,6 +61,7 @@ namespace TTVCore.Chat
                 Text = text,
                 ReplyParentMessageId = replyParentMessageId,
                 Completion = new TaskCompletionSource<SendResult>(TaskCreationOptions.RunContinuationsAsynchronously),
+                Debug = DebugMode.Active,
             };
             lock (_gate) {
                 if (_pending.Count >= MaxPending) {
@@ -134,6 +138,11 @@ namespace TTVCore.Chat
 
         private static async Task<SendResult> SendAsync(Item item, CancellationToken ct)
         {
+            // デバッグ機能が有効な間（または有効な間に列に入れたもの）は、本物には送らず、送れたものとして返す。
+            // 利用側の MOD が本番と同じ（成功したときの）処理を進めるため。頻度の上限は本番と同じく効く
+            if (item.Debug || DebugMode.Active) {
+                return new SendResult { Status = SendStatus.Sent, MessageId = Guid.NewGuid().ToString() };
+            }
             var tm = TokenManager.Instance;
             var broadcasterId = tm?.UserId;
             if (tm == null || tm.State != AuthState.Authenticated || broadcasterId == null) {
