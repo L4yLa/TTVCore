@@ -365,6 +365,26 @@ namespace TTVCore.Api.V1
         public string AmountCurrency { get; internal set; }
     }
 
+    public sealed class WatchStreakNoticeDetail : ChatNoticeDetail
+    {
+        /// <summary>続けて視聴した配信の回数。</summary>
+        public int StreakCount { get; internal set; }
+        /// <summary>この節目で付与されたチャンネルポイント。</summary>
+        public int ChannelPointsAwarded { get; internal set; }
+    }
+
+    public sealed class ModiversaryNoticeDetail : ChatNoticeDetail
+    {
+        /// <summary>このチャンネルでモデレーターになってからの月数。</summary>
+        public int Months { get; internal set; }
+    }
+
+    public sealed class GiftedDropsSummaryNoticeDetail : ChatNoticeDetail
+    {
+        /// <summary>ギフトのドロップを受け取った人数。</summary>
+        public int RecipientCount { get; internal set; }
+    }
+
     public sealed class MessageDeletedEvent
     {
         public string BroadcasterId { get; internal set; }
