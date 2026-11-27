@@ -9,8 +9,7 @@
   <slider-setting text='{{Cache VRAM limit|キャッシュの VRAM 上限}}' value='pack-vram' min='0' max='256' increment='16' integer-only='true' apply-on-change='true'
                   hover-hint='{{In MB. Frequently used emotes are preloaded into shared textures in the menu. 0 turns it off|単位は MB です よく使われるエモートをメニューで共有のテクスチャに先読みします 0 で使いません}}' />
   <horizontal preferred-width='100' horizontal-fit='PreferredSize' spacing='2'>
-    <button id='debug-button' text='~debug-button-text' on-click='debug-button-click' preferred-width='62'
-            hover-hint='{{Test notifications and chat without Twitch. Real notifications and chat are ignored and nothing is sent while it is on. It turns off when you leave this screen|Twitch を使わずに通知とチャットを試します 有効な間は本物の通知とチャットを無視し 送信もしません この画面から出ると解除されます}}' />
+    <button id='debug-button' text='~debug-button-text' preferred-width='62' />
     <button text='{{Tests|テスト}}' on-click='open-tests' interactable='~debug-active' preferred-width='30' />
   </horizontal>
   <text text='~debug-status' font-size='3.5' align='Center' size-delta-y='5' />

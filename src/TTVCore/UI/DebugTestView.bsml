@@ -8,8 +8,7 @@
     <text text='{{Chat test|チャットのテスト}}' font-size='5' align='Center' size-delta-y='7' />
     <text text='{{Random messages from 100 test messages|テスト用の100件からランダムに流します}}' font-size='3' align='Center' size-delta-y='4' />
     <slider-setting text='{{Messages|流す数}}' value='chat-count' min='10' max='1000' increment='10' integer-only='true' apply-on-change='true' />
-    <slider-setting text='{{Speed|速度}}' value='chat-speed' min='1' max='10' increment='1' integer-only='true' formatter='format-speed' apply-on-change='true'
-                    hover-hint='{{60 messages per minute times the multiplier. The intervals vary like real chat|1分に60件 x 倍率 間隔は本物のチャットのようにばらつきます}}' />
+    <slider-setting text='{{Speed|速度}}' value='chat-speed' min='1' max='10' increment='1' integer-only='true' formatter='format-speed' apply-on-change='true' />
     <horizontal preferred-width='50' horizontal-fit='PreferredSize'>
       <button text='~chat-button-text' on-click='chat-toggle' preferred-width='40' />
     </horizontal>

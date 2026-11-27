@@ -146,30 +146,20 @@ namespace TTVCore.UI
             if (_debugButton == null) {
                 return;
             }
-            _debugHold = _debugButton.gameObject.AddComponent<LongPressHandler>();
+            // ボタン自身では長押しを作れないため、上に重ねた当たり判定で扱う（LongPressHandler の説明）
+            _debugHold = LongPressHandler.AttachTo(_debugButton);
             _debugHold.Duration = DebugHoldSeconds;
             _debugHold.CanStart = () => !DebugMode.Active;
+            // BSML のボタンの文字は Content/Text にある
+            var label = _debugButton.transform.Find("Content/Text")?.GetComponent<TextMeshProUGUI>();
             _debugHold.Progress = p => {
-                if (!DebugMode.Active) {
-                    var label = _debugButton.GetComponentInChildren<TextMeshProUGUI>();
-                    if (label != null) {
-                        label.text = p.HasValue ? $"{DebugEnableText}  {(int)(p.Value * 100)}%" : DebugEnableText;
-                    }
+                if (label != null && !DebugMode.Active) {
+                    label.text = p.HasValue ? $"{DebugEnableText}  {(int)(p.Value * 100)}%" : DebugEnableText;
                 }
             };
             _debugHold.Completed = DebugMode.Enable;
-        }
-
-        /// <summary>有効なときは1回押すだけで解除する。無効なときのクリックは長押しの側で扱う。</summary>
-        [UIAction("debug-button-click")]
-        private void DebugButtonClick()
-        {
-            if (_debugHold != null && _debugHold.IsSwallowedClick) {
-                return;
-            }
-            if (DebugMode.Active) {
-                DebugMode.Disable();
-            }
+            // 有効なときは、押して離すだけで解除する
+            _debugHold.Clicked = DebugMode.Disable;
         }
 
         [UIAction("open-tests")]
