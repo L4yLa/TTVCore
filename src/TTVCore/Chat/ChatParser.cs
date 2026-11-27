@@ -356,6 +356,19 @@ namespace TTVCore.Chat
                         AmountCurrency = JsonUtil.Str(JsonUtil.At(amount, "currency")),
                     };
                 }
+                case "watch_streak":
+                    return new WatchStreakNoticeDetail {
+                        StreakCount = JsonUtil.Int(d["streak_count"]),
+                        ChannelPointsAwarded = JsonUtil.Int(d["channel_points_awarded"]),
+                    };
+                case "modiversary":
+                    return new ModiversaryNoticeDetail {
+                        Months = JsonUtil.Int(d["months"]),
+                    };
+                case "gifted_drops_summary":
+                    return new GiftedDropsSummaryNoticeDetail {
+                        RecipientCount = JsonUtil.Int(d["recipient_count"]),
+                    };
                 default:
                     return null;
             }
