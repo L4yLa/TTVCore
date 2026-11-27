@@ -158,7 +158,7 @@ def notifications():
         step("channel.chat.notification", notice_event(r, "sub", {"sub_tier": "1000", "is_prime": False, "duration_months": 1},
                                                        f"{r[2]} subscribed at Tier 1."), 300),
     ])
-    add("sub_prime", "Sub (Prime)", "サブスク（Prime）", [
+    add("sub_prime", "Sub (Prime)", "サブスク (Prime)", [
         step("channel.subscribe", {**user_fields("user", USERS[4]), **bcast(), "tier": "1000", "is_gift": False}),
         step("channel.chat.notification", notice_event(USERS[4], "sub", {"sub_tier": "1000", "is_prime": True, "duration_months": 1},
                                                        f"{USERS[4][2]} subscribed with Prime."), 300),
@@ -174,7 +174,7 @@ def notifications():
                                               "cumulative_months": 14, "streak_months": 6, "duration_months": 1}, 300),
     ])
     rcp = RECIPIENTS[0]
-    add("sub_gift", "Gift sub", "ギフト（1件）", [
+    add("sub_gift", "Gift sub (1)", "ギフト (1件)", [
         step("channel.chat.notification", notice_event(GIFTER, "sub_gift", {
             "duration_months": 1, "cumulative_total": 5, **user_fields("recipient_user", rcp), "sub_tier": "1000", "community_gift_id": None,
         }, f"{GIFTER[2]} gifted a Tier 1 sub to {rcp[2]}! They have given 5 Gift Subs in the channel!")),
@@ -191,8 +191,8 @@ def notifications():
             "community_gift_id": "{{id:community}}",
         }, f"{GIFTER[2]} gifted a Tier 1 sub to {rc[2]}!"), 100))
         community.append(step("channel.subscribe", {**user_fields("user", rc), **bcast(), "tier": "1000", "is_gift": True}, 50))
-    add("community_sub_gift", "Community gift (3)", "まとめてギフト（3件）", community)
-    add("community_sub_gift_anonymous", "Anonymous gift (3)", "匿名のまとめてギフト（3件）", [
+    add("community_sub_gift", "Community gift (3)", "まとめてギフト (3件)", community)
+    add("community_sub_gift_anonymous", "Anonymous gift (3)", "匿名ギフト (3件)", [
         step("channel.subscription.gift", {"user_id": None, "user_login": None, "user_name": None, **bcast(), "total": 3, "tier": "1000",
                                            "cumulative_total": None, "is_anonymous": True}),
         step("channel.chat.notification", notice_event(GIFTER, "community_sub_gift", {
@@ -214,38 +214,38 @@ def notifications():
                                   "message": {"text": "Cheer100 ナイスプレイ！", "fragments": []}, "power_up": None, "custom_power_up": None}),
         step("channel.chat.message", chat_event(cheer_user, "Cheer100 ナイスプレイ！", bits=100), 200),
     ])
-    add("power_up_effect", "Power-up: message effect", "Power-up：メッセージエフェクト", [
+    add("power_up_effect", "Power-up: effect", "Power-up: エフェクト", [
         step("channel.bits.use", {**bcast(), **user_fields("user", USERS[7]), "bits": 30, "type": "power_up",
                                   "message": {"text": "すごい！", "fragments": []},
                                   "power_up": {"type": "message_effect", "emote": None, "message_effect_id": "cosmic-abyss"}, "custom_power_up": None}),
         step("channel.chat.message", chat_event(USERS[7], "すごい！ エフェクト付きで応援！", message_type="power_ups_message_effect"), 200),
     ])
-    add("power_up_gigantify", "Power-up: gigantify", "Power-up：巨大化エモート", [
+    add("power_up_gigantify", "Power-up: gigantify", "Power-up: 巨大化", [
         step("channel.bits.use", {**bcast(), **user_fields("user", USERS[8]), "bits": 50, "type": "power_up",
                                   "message": {"text": "Kappa", "fragments": []},
                                   "power_up": {"type": "gigantify_an_emote", "emote": {"id": "25", "name": "Kappa"}, "message_effect_id": None},
                                   "custom_power_up": None}),
         step("channel.chat.message", chat_event(USERS[8], "でかい Kappa", message_type="power_ups_gigantified_emote"), 200),
     ])
-    add("power_up_celebration", "Power-up: celebration", "Power-up：セレブレーション", [
+    add("power_up_celebration", "Power-up: celebration", "Power-up: セレブレーション", [
         step("channel.bits.use", {**bcast(), **user_fields("user", USERS[9]), "bits": 100, "type": "power_up", "message": None,
                                   "power_up": {"type": "celebration", "emote": {"id": "41", "name": "Kreygasm"}, "message_effect_id": None},
                                   "custom_power_up": None}),
     ])
-    add("redemption", "Channel points (with input)", "チャンネルポイント（入力あり）", [
+    add("redemption", "Points (with input)", "ポイント (入力あり)", [
         step("channel.channel_points_custom_reward_redemption.add", {
             "id": "{{id:redemption}}", **bcast(), **user_fields("user", USERS[2]), "user_input": "この曲をもう一回！",
             "status": "unfulfilled", "reward": {"id": "{{id:reward}}", "title": "リクエスト", "cost": 500, "prompt": "メッセージを書いてください"},
             "redeemed_at": "{{now}}"}),
         step("channel.chat.message", chat_event(USERS[2], "この曲をもう一回！", reward="{{id:reward}}"), 200),
     ])
-    add("redemption_simple", "Channel points (no input)", "チャンネルポイント（入力なし）", [
+    add("redemption_simple", "Points (no input)", "ポイント (入力なし)", [
         step("channel.channel_points_custom_reward_redemption.add", {
             "id": "{{id:redemption}}", **bcast(), **user_fields("user", USERS[3]), "user_input": "",
             "status": "fulfilled", "reward": {"id": "{{id:reward}}", "title": "水分補給", "cost": 100, "prompt": ""},
             "redeemed_at": "{{now}}"}),
     ])
-    add("hype_train", "Hype Train (begin → end)", "ハイプトレイン（開始→終了）", [
+    add("hype_train", "Hype Train", "ハイプトレイン", [
         step("channel.hype_train.begin", {"id": "{{id:train}}", **bcast(), "total": 137, "progress": 137, "goal": 500, "level": 1,
                                           "top_contributions": [], "shared_train_participants": None, "is_shared_train": False,
                                           "type": "regular", "started_at": "{{now}}", "expires_at": "{{now+300}}",
@@ -259,7 +259,7 @@ def notifications():
                                         "shared_train_participants": None, "is_shared_train": False, "type": "regular",
                                         "started_at": "{{now}}", "ended_at": "{{now}}", "cooldown_ends_at": "{{now+3600}}"}, 3000, version="2"),
     ])
-    add("ad_break", "Ad break (30 s)", "広告（30秒）", [
+    add("ad_break", "Ad break (30 s)", "広告 (30秒)", [
         step("channel.ad_break.begin", {"duration_seconds": 30, "started_at": "{{now}}", "is_automatic": True, **bcast(),
                                         "requester_user_id": B_ID, "requester_user_login": B_LOGIN, "requester_user_name": B_NAME}),
     ])
@@ -277,7 +277,7 @@ def notifications():
             "charity_name": "Example Charity", "amount": {"value": 500, "decimal_place": 2, "currency": "USD"}},
             f"{USERS[1][2]}: Donated USD 5.00 to support Example Charity")),
     ])
-    add("prime_paid_upgrade", "Prime → paid upgrade", "Prime から有料に切り替え", [
+    add("prime_paid_upgrade", "Prime to paid", "Prime から有料へ", [
         step("channel.chat.notification", notice_event(USERS[4], "prime_paid_upgrade", {"sub_tier": "1000"},
                                                        f"{USERS[4][2]} converted from a Prime sub to a Tier 1 sub!")),
     ])
