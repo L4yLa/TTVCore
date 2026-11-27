@@ -30,6 +30,7 @@ namespace TTVCore.Diagnostics
             }
             s_active = true;
             Plugin.Log.Notice("Debug mode: on (real notifications and chat are ignored, and chat is not sent).");
+            ClearChat();
             Changed?.Invoke();
         }
 
@@ -41,7 +42,17 @@ namespace TTVCore.Diagnostics
             s_active = false;
             DebugEvents.StopAll();
             Plugin.Log.Notice("Debug mode: off.");
+            ClearChat();
             Changed?.Invoke();
+        }
+
+        /// <summary>
+        /// 有効にしたときと解除したときに、チャットのクリア（Chat.ChatCleared）を送る。
+        /// 本物のチャットとテストのチャットが、利用側の表示で混ざらないようにするため。
+        /// </summary>
+        private static void ClearChat()
+        {
+            TTVCoreApi.Chat.RaiseChatCleared(new ChatClearedEvent { BroadcasterId = Broadcaster.Id });
         }
 
         /// <summary>テストに使う配信者。認証していればそのアカウント、していなければ仮の値。</summary>

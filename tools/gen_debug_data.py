@@ -286,7 +286,7 @@ def notifications():
             "gifter_is_anonymous": False, **user_fields("gifter_user", GIFTER)},
             f"{RECIPIENTS[0][2]} is continuing the Gift Sub they got from {GIFTER[2]}!")),
     ])
-    add("pay_it_forward", "Pay it forward", "恩送り", [
+    add("pay_it_forward", "Pay it forward", "ペイ・フォワード", [
         step("channel.chat.notification", notice_event(RECIPIENTS[1], "pay_it_forward", {
             "gifter_is_anonymous": False, **user_fields("gifter_user", GIFTER)},
             f"{RECIPIENTS[1][2]} is paying forward the Gift they got from {GIFTER[2]} to the community!")),

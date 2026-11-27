@@ -270,7 +270,7 @@ The lists are loaded after EventSub connects. During a shared chat, the lists of
 
 ### 11.1 Debug mode (settings screen)
 
-Hold "Enable debug (hold)" in the TTVCore settings screen for 3 seconds to turn on debug mode. While it is on, "Tests" lets you send notification tests (one per type) and a chat test (random messages from 100 test messages, at the count and speed you choose). Tests go through the same processing as EventSub notifications that were actually received.
+Hold "Enable debug (hold)" in the TTVCore settings screen for 3 seconds to turn on debug mode. Turning it on or off sends a chat clear (`Chat.ChatCleared`). While it is on, "Tests" lets you send notification tests (one per type) and a chat test (random messages from 100 test messages, at the count and speed you choose). Tests go through the same processing as EventSub notifications that were actually received.
 
 - While it is on, real notifications and chat from Twitch are discarded (Twitch does not resend them, so they are lost).
 - While it is on, chat sends are not sent to Twitch and return `SendStatus.Sent` with a placeholder message ID. The send rate limit works the same as usual.
