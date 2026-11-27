@@ -14,6 +14,9 @@
     <EmbeddedResource Include="Resources\emoji-table.txt" LogicalName="TTVCore.Resources.emoji-table.txt" />
     <EmbeddedResource Include="Resources\twemoji.bin" LogicalName="TTVCore.Resources.twemoji.bin" />
     <EmbeddedResource Include="UI\SettingsView.bsml" LogicalName="TTVCore.UI.SettingsView.bsml" />
+    <EmbeddedResource Include="UI\DebugTestView.bsml" LogicalName="TTVCore.UI.DebugTestView.bsml" />
+    <EmbeddedResource Include="Resources\Debug\notifications.json" LogicalName="TTVCore.Resources.Debug.notifications.json" />
+    <EmbeddedResource Include="Resources\Debug\chat-messages.json" LogicalName="TTVCore.Resources.Debug.chat-messages.json" />
     <EmbeddedResource Include="UI\AuthPromptView.bsml" LogicalName="TTVCore.UI.AuthPromptView.bsml" />
     <None Remove="Resources\**" />
     <None Remove="UI\*.bsml" />

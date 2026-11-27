@@ -2,6 +2,7 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 using HMUI;
 using System;
+using TTVCore.Diagnostics;
 using TTVCore.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -97,6 +98,14 @@ namespace TTVCore.UI
             }
         }
 
+        /// <summary>デバッグ機能のテストの画面を開く（設定画面の「テスト」から）。</summary>
+        public static void ShowTests()
+        {
+            if (s_flow != null && s_flow.isActivated) {
+                s_flow.ShowTests();
+            }
+        }
+
         private static void Show() => Show(false);
 
         private static void Show(bool immediately)
@@ -112,6 +121,18 @@ namespace TTVCore.UI
     internal sealed class SettingsFlowCoordinator : FlowCoordinator
     {
         private SettingsViewController _view;
+        private DebugTestViewController _testView;
+
+        /// <summary>テストの画面を重ねて開く。テストの画面も設定画面の一部として扱い、デバッグ機能は解除しない。</summary>
+        public void ShowTests()
+        {
+            if (_testView == null) {
+                _testView = BeatSaberUI.CreateViewController<DebugTestViewController>();
+            }
+            if (this.topViewController != _testView) {
+                this.PresentViewController(_testView);
+            }
+        }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -127,14 +148,34 @@ namespace TTVCore.UI
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
+            if (_testView != null && topViewController == _testView) {
+                // テストの画面から設定画面に戻る
+                this.DismissViewController(_testView);
+                return;
+            }
+            // 設定画面から出たらデバッグ機能を解除する
+            DebugMode.Disable();
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
+        }
+
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            // 戻るボタン以外で閉じられた場合も解除する（他の画面が重なっただけのときは解除しない）
+            if (removedFromHierarchy) {
+                DebugMode.Disable();
+            }
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         private void OnDestroy()
         {
+            DebugMode.Disable();
             // 作り直すときに、古い画面を残さない
             if (_view != null) {
                 Destroy(_view.gameObject);
+            }
+            if (_testView != null) {
+                Destroy(_testView.gameObject);
             }
         }
     }
